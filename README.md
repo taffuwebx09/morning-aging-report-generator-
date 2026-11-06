@@ -1,4 +1,4 @@
-# Morning Aging Report Generator v2.2 — Portable Windows Processor
+# Morning Aging Report Generator v2.2.1 — Portable Windows Processor
 
 ## What this release provides
 - Vercel-hosted React/Vite website.
@@ -67,3 +67,7 @@ CSV parsing is streaming on the local Node processor. Cleaned source rows are wr
 
 ## Chrome / Edge Local Network permission
 When connecting from the Vercel HTTPS site to the local processor, click the Connect Processor button first. Chrome or Edge may ask for Local Network / Loopback access; allow it for the site. The UI sends local API fetch requests with the `loopback` target address-space hint. The processor binds only to `127.0.0.1`.
+
+
+## Processed Data sheet fix (v2.2.1)
+The processor now writes the cleaned CSV's column header row before writing source records. The XLSX second-pass parser therefore reads the actual header row and emits every processed source record with its values. Before committing the workbook, it checks that the number of Processed Data rows written exactly matches the number of CSV data rows parsed. A mismatch fails the job instead of producing a misleading empty Processed Data worksheet.

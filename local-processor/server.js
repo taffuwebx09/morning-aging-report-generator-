@@ -123,6 +123,9 @@ async function parseCsvAndAggregate(job, inputPath, cleanedPath) {
   const groups = new Map();
   const bucketTotals = { OPS: 0, CS: 0, Security: 0 };
   const output = createWriteStream(cleanedPath, { encoding: "utf8" });
+  // The cleaned intermediate CSV MUST start with its header row.
+  // The workbook export pass uses columns:true and depends on this first row.
+  let cleanedHeaderWritten = false;
   const input = createReadStream(inputPath);
   const parser = parse({
     bom: true,
@@ -176,6 +179,10 @@ async function parseCsvAndAggregate(job, inputPath, cleanedPath) {
 
   try {
     for await (const record of parser) {
+      if (!cleanedHeaderWritten) {
+        await writeBackpressure(output, headers.map(csvCell).join(",") + "\\r\\n");
+        cleanedHeaderWritten = true;
+      }
       rows += 1;
       record[waybillHeader] = cleanWaybill(record[waybillHeader]);
       const waybill = record[waybillHeader];
@@ -207,6 +214,11 @@ async function parseCsvAndAggregate(job, inputPath, cleanedPath) {
       const line = headers.map(h => csvCell(record[h])).join(",") + "\r\n";
       await writeBackpressure(output, line);
       if (rows % 10000 === 0) update(job, { rowsProcessed: rows });
+    }
+    // Also write headers for a header-only CSV (zero data records).
+    if (headers && !cleanedHeaderWritten) {
+      await writeBackpressure(output, headers.map(csvCell).join(",") + "\\r\\n");
+      cleanedHeaderWritten = true;
     }
     output.end();
     await finished(output);
@@ -322,6 +334,9 @@ async function createWorkbook(job, cleanedPath, outputPath, summary) {
     }
   }
   dataSheet.commit();
+  if (exportedRows !== summary.rows) {
+    throw new Error(`Processed Data export row mismatch: CSV read ${summary.rows.toLocaleString("en-IN")} rows but Excel wrote ${exportedRows.toLocaleString("en-IN")} rows. Workbook was not marked complete.`);
+  }
   await workbook.commit();
   update(job, { exportedRows, dataSheets: sheetNo });
 }
@@ -391,7 +406,7 @@ const upload = multer({
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 }
 });
 
-app.get("/api/health", (_req, res) => res.json({ ok: true, version: "2.1.0" }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, version: "2.2.1" }));
 app.get("/api/verify", auth, (_req, res) => res.json({ ok: true }));
 
 app.post("/api/jobs", auth, upload.single("file"), async (req, res) => {
