@@ -1,0 +1,12 @@
+ONE-TIME SETUP ON WINDOWS
+1. Extract the complete project ZIP.
+2. Open desktop-installer folder.
+3. Double-click Setup.bat.
+4. Wait for setup to finish. Internet is required only for this installation and package download.
+5. A Desktop shortcut named "Start Morning Aging Processor" will be created.
+
+DAILY USE
+1. Double-click the Desktop shortcut.
+2. Keep the CMD window open.
+3. Open the Vercel website and paste the local key printed in CMD.
+4. Connect, upload CSV, process and download the Excel workbook.
