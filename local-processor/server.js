@@ -180,7 +180,7 @@ async function parseCsvAndAggregate(job, inputPath, cleanedPath) {
   try {
     for await (const record of parser) {
       if (!cleanedHeaderWritten) {
-        await writeBackpressure(output, headers.map(csvCell).join(",") + "\\r\\n");
+        await writeBackpressure(output, headers.map(csvCell).join(",") + "\r\n");
         cleanedHeaderWritten = true;
       }
       rows += 1;
@@ -217,7 +217,7 @@ async function parseCsvAndAggregate(job, inputPath, cleanedPath) {
     }
     // Also write headers for a header-only CSV (zero data records).
     if (headers && !cleanedHeaderWritten) {
-      await writeBackpressure(output, headers.map(csvCell).join(",") + "\\r\\n");
+      await writeBackpressure(output, headers.map(csvCell).join(",") + "\r\n");
       cleanedHeaderWritten = true;
     }
     output.end();
