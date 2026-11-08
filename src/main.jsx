@@ -218,6 +218,15 @@ function App() {
           </div>}
           {connected && <button className="disconnect" onClick={disconnect}>Disconnect processor</button>}
 
+          <a
+            className="processor-download"
+            href="https://github.com/taffuwebx09/morning-aging-report-generator-/archive/refs/heads/main.zip"
+            download
+          >
+            <Download size={16} />
+            <span><b>Download Windows Processor</b><small>One-time setup · ZIP · Windows</small></span>
+          </a>
+
           <div className={`drop ${dragging ? "drag" : ""}`} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); chooseFile(e.dataTransfer.files?.[0]); }}>
             <input ref={picker} type="file" hidden accept=".csv,text/csv" onChange={e => chooseFile(e.target.files?.[0])} />
             <div className="upload-icon"><UploadCloud size={29} /></div>
